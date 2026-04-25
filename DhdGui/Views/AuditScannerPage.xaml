@@ -1,0 +1,163 @@
+<Page x:Class="DhdGui.Views.AuditScannerPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.modernwpf.com/2019"
+      xmlns:conv="clr-namespace:DhdGui.Converters"
+      Title="Audit Scanner">
+
+    <Page.Resources>
+        <conv:RiskLevelToColorConverter x:Key="RiskColor"/>
+    </Page.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Configuration panel -->
+        <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                CornerRadius="8" Padding="20" Margin="0,0,0,16">
+            <StackPanel>
+                <!-- Scan mode -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <RadioButton Content="Diretório"       IsChecked="{Binding IsDirectory}" Margin="0,0,16,0"/>
+                    <RadioButton Content="Executável único" IsChecked="{Binding IsDirectory, Converter={StaticResource InvertBool}}"/>
+                </StackPanel>
+
+                <!-- Target path -->
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding TargetPath, UpdateSourceTrigger=PropertyChanged}"
+                             ui:ControlHelper.PlaceholderText="{Binding TargetPlaceholder}"
+                             Margin="0,0,8,0"/>
+                    <Button Grid.Column="1" Content="Browse…" Command="{Binding BrowseTargetCommand}"/>
+                </Grid>
+
+                <!-- Options checkboxes -->
+                <WrapPanel Margin="0,0,0,8">
+                    <CheckBox Content="Phantom DLLs"      IsChecked="{Binding CheckPhantomDlls}"       Margin="0,0,16,0"/>
+                    <CheckBox Content="Writable Dirs"     IsChecked="{Binding CheckWritableDirs}"      Margin="0,0,16,0"/>
+                    <CheckBox Content="Verificar ACL"     IsChecked="{Binding CheckAclPermissiveness}" Margin="0,0,16,0"/>
+                    <CheckBox Content="Ordem de Busca"    IsChecked="{Binding CheckSearchOrder}"       Margin="0,0,16,0"/>
+                    <CheckBox Content="Incluir Low Severity" IsChecked="{Binding IncludeLowSeverity}"/>
+                </WrapPanel>
+
+                <!-- Recursion depth -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <TextBlock Text="Profundidade:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ui:NumberBox Value="{Binding MaxRecursionDepth}" Minimum="0" Maximum="10" SpinButtonPlacementMode="Inline"/>
+                </StackPanel>
+
+                <!-- Output path -->
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Text="{Binding OutputReportPath}" ui:ControlHelper.PlaceholderText="Relatório JSON (opcional)…" Margin="0,0,8,0"/>
+                    <Button Grid.Column="1" Content="Browse…" Command="{Binding BrowseOutputReportCommand}"/>
+                </Grid>
+
+                <!-- Actions -->
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="▶  Iniciar Scan" Command="{Binding StartScanCommand}"
+                            Style="{StaticResource AccentButtonStyle}" Margin="0,0,8,0"/>
+                    <Button Content="✕  Cancelar"    Command="{Binding CancelScanCommand}" Margin="0,0,16,0"/>
+                    <Button Content="Exportar JSON"  Command="{Binding ExportJsonCommand}" Margin="0,0,8,0"/>
+                    <Button Content="Abrir Relatório" Command="{Binding OpenReportCommand}"/>
+                </StackPanel>
+
+                <!-- Progress + Status -->
+                <ProgressBar IsIndeterminate="{Binding IsBusy}" Height="4" Margin="0,12,0,0"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}"/>
+                <TextBlock Text="{Binding StatusText}" Margin="0,8,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Summary bar -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                CornerRadius="8" Padding="16" Margin="0,0,0,16"
+                Visibility="{Binding HasResults, Converter={StaticResource BoolToVisibility}}">
+            <UniformGrid Columns="5">
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding Summary.ExecutablesScanned, TargetNullValue='—'}" FontSize="24" FontWeight="Bold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="Executables" Style="{StaticResource CaptionTextBlockStyle}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding Summary.DllsEvaluated, TargetNullValue='—'}" FontSize="24" FontWeight="Bold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="DLLs Avaliadas" Style="{StaticResource CaptionTextBlockStyle}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding Summary.PhantomCount, TargetNullValue='—'}" FontSize="24" FontWeight="Bold"
+                               HorizontalAlignment="Center" Foreground="OrangeRed"/>
+                    <TextBlock Text="Phantoms" Style="{StaticResource CaptionTextBlockStyle}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding Summary.WritableDirCount, TargetNullValue='—'}" FontSize="24" FontWeight="Bold"
+                               HorizontalAlignment="Center" Foreground="Goldenrod"/>
+                    <TextBlock Text="Writable Dirs" Style="{StaticResource CaptionTextBlockStyle}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding Summary.AclIssueCount, TargetNullValue='—'}" FontSize="24" FontWeight="Bold"
+                               HorizontalAlignment="Center"/>
+                    <TextBlock Text="ACL Issues" Style="{StaticResource CaptionTextBlockStyle}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </UniformGrid>
+        </Border>
+
+        <!-- Findings grid -->
+        <Grid Grid.Row="2" Visibility="{Binding HasResults, Converter={StaticResource BoolToVisibility}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Filters -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="Severidade:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <ComboBox ItemsSource="{Binding SeverityFilters}"
+                          SelectedItem="{Binding FilterSeverity}"
+                          Width="140" Margin="0,0,16,0"/>
+                <TextBlock Text="Issue Code:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBox Text="{Binding FilterIssueCode, UpdateSourceTrigger=PropertyChanged}"
+                         Width="160" ui:ControlHelper.PlaceholderText="Filtrar…"/>
+            </StackPanel>
+
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Findings}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      CanUserAddRows="False"
+                      EnableRowVirtualization="True"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Sev" Width="48">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Ellipse Width="12" Height="12"
+                                         Fill="{Binding Severity, Converter={StaticResource RiskColor}}"
+                                         VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="DLL"        Width="180" Binding="{Binding DllName}"/>
+                    <DataGridTextColumn Header="Issue Code" Width="150" Binding="{Binding IssueCode}"/>
+                    <DataGridTextColumn Header="Caminho"    Width="*"   Binding="{Binding TargetPath}"/>
+                    <DataGridTextColumn Header="Detalhe"    Width="300" Binding="{Binding Detail}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</Page>

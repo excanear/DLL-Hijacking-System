@@ -1,0 +1,119 @@
+<Page x:Class="DhdGui.Views.ValidateDllPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.modernwpf.com/2019"
+      xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+      xmlns:conv="clr-namespace:DhdGui.Converters"
+      Title="Validar DLL">
+
+    <Page.Resources>
+        <conv:ScoreToColorConverter x:Key="ScoreColor"/>
+        <conv:BlockReasonConverter  x:Key="BlockReasonConv"/>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24" MaxWidth="900">
+
+            <!-- Input row -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Text="{Binding DllPath, UpdateSourceTrigger=PropertyChanged}"
+                         ui:ControlHelper.PlaceholderText="Caminho da DLL…"
+                         VerticalContentAlignment="Center" Margin="0,0,8,0"/>
+                <Button Grid.Column="1" Content="Browse…" Command="{Binding BrowseDllCommand}" Margin="0,0,8,0"/>
+                <Button Grid.Column="2" Content="Validar" Command="{Binding ValidateCommand}"
+                        Style="{StaticResource AccentButtonStyle}"/>
+            </Grid>
+
+            <!-- Error message -->
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="OrangeRed"
+                       Margin="0,8,0,0"
+                       Visibility="{Binding ErrorMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+            <!-- Spinner -->
+            <ui:ProgressRing IsActive="{Binding IsBusy}" Width="40" Height="40"
+                             HorizontalAlignment="Left" Margin="0,16,0,0"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}"/>
+
+            <!-- Result expander -->
+            <Expander Header="Resultado da Validação" IsExpanded="True"
+                      Margin="0,16,0,0"
+                      Visibility="{Binding HasResult, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel Margin="0,12,0,0">
+
+                    <!-- Aggregate score badge -->
+                    <Border CornerRadius="8" Padding="16" Margin="0,0,0,12"
+                            Background="{Binding Result.AggregateScore, Converter={StaticResource ScoreColor}, FallbackValue=Gray}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Result.AggregateScore, StringFormat='Score: {0:F3}', TargetNullValue='Score: —'}"
+                                       FontSize="28" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding Result.LoadAction, TargetNullValue='—'}"
+                                       FontSize="20" Foreground="White" Margin="24,0,0,0"
+                                       VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Score bar chart -->
+                    <lvc:CartesianChart Series="{Binding ScoreSeries}"
+                                        YAxes="{Binding ScoreYAxes}"
+                                        Height="140" Margin="0,0,0,12"
+                                        ZoomMode="None"/>
+
+                    <!-- Properties grid -->
+                    <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                            CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/>
+                                <RowDefinition/><RowDefinition/><RowDefinition/>
+                                <RowDefinition/><RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="Risk Level"       FontWeight="SemiBold"/>
+                            <TextBlock Text="Whitelist Tier"   FontWeight="SemiBold" Grid.Row="1"/>
+                            <TextBlock Text="SHA-256"          FontWeight="SemiBold" Grid.Row="2"/>
+                            <TextBlock Text="Assinatura"       FontWeight="SemiBold" Grid.Row="3"/>
+                            <TextBlock Text="Cert Subject"     FontWeight="SemiBold" Grid.Row="4"/>
+                            <TextBlock Text="Cert Issuer"      FontWeight="SemiBold" Grid.Row="5"/>
+                            <TextBlock Text="Do cache"         FontWeight="SemiBold" Grid.Row="6"/>
+                            <TextBlock Text="Falha"            FontWeight="SemiBold" Grid.Row="7"/>
+
+                            <TextBlock Grid.Column="1" Text="{Binding Result.RiskLevel}"/>
+                            <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Result.WhitelistTier}"/>
+                            <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding Result.Sha256Hex}"
+                                       FontFamily="Consolas" FontSize="11"/>
+                            <TextBlock Grid.Column="1" Grid.Row="3"
+                                       Text="{Binding Result.SignaturePresent, Converter={StaticResource BoolToYesNo}}"/>
+                            <TextBlock Grid.Column="1" Grid.Row="4" Text="{Binding Result.CertSubject}"/>
+                            <TextBlock Grid.Column="1" Grid.Row="5" Text="{Binding Result.CertIssuer}"/>
+                            <TextBlock Grid.Column="1" Grid.Row="6"
+                                       Text="{Binding Result.ServedFromCache, Converter={StaticResource BoolToYesNo}}"/>
+                            <TextBlock Grid.Column="1" Grid.Row="7" Text="{Binding Result.FailureReason}"
+                                       Foreground="OrangeRed"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Block reasons list -->
+                    <TextBlock Text="Block Reasons" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                    <ItemsControl ItemsSource="{Binding Result.BlockReasons, Converter={StaticResource BlockReasonConv}}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" Foreground="OrangeRed" Margin="0,2"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </StackPanel>
+            </Expander>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -1,0 +1,114 @@
+<Page x:Class="DhdGui.Views.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.modernwpf.com/2019"
+      Title="Configurações">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24" MaxWidth="860">
+
+            <!-- Paths section -->
+            <TextBlock Text="Caminhos" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,12"/>
+            <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                    CornerRadius="8" Padding="20" Margin="0,0,0,20">
+                <StackPanel>
+                    <!-- Policy file -->
+                    <TextBlock Text="Policy File" Margin="0,0,0,4"/>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding PolicyFilePath}" Margin="0,0,8,0"/>
+                        <Button Grid.Column="1" Content="Browse…" Command="{Binding BrowsePolicyFileCommand}" Margin="0,0,8,0"/>
+                        <Button Grid.Column="2" Content="Recarregar" Command="{Binding ReloadPolicyCommand}"/>
+                    </Grid>
+
+                    <!-- Hash DB -->
+                    <TextBlock Text="Hash Database" Margin="0,0,0,4"/>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding HashDbPath}" Margin="0,0,8,0"/>
+                        <Button Grid.Column="1" Content="Browse…" Command="{Binding BrowseHashDbCommand}" Margin="0,0,8,0"/>
+                        <Button Grid.Column="2" Content="Verificar Integridade" Command="{Binding VerifyHashDbCommand}"/>
+                    </Grid>
+                    <TextBlock Text="{Binding HashDbIntegrityBadge}" 
+                               Foreground="{Binding HashDbIntegrityOk, Converter={StaticResource BoolToLockColor}}"
+                               Visibility="{Binding HashDbIntegrityBadge, Converter={StaticResource NullOrEmptyToCollapsed}}"
+                               Margin="0,0,0,12"/>
+
+                    <!-- Log directory -->
+                    <TextBlock Text="Log Directory" Margin="0,0,0,4"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding LogDirectory}" Margin="0,0,8,0"/>
+                        <Button Grid.Column="1" Content="Browse…" Command="{Binding BrowseLogDirectoryCommand}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Monitor section -->
+            <TextBlock Text="Monitor" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,12"/>
+            <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                    CornerRadius="8" Padding="20" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="{Binding PollIntervalMs, StringFormat='Poll interval: {0} ms'}" Margin="0,0,0,8"/>
+                    <Slider Minimum="500" Maximum="30000" Value="{Binding PollIntervalMs}"
+                            TickFrequency="500" IsSnapToTickEnabled="True"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Hardening section -->
+            <TextBlock Text="Hardening" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,12"/>
+            <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                    CornerRadius="8" Padding="20" Margin="0,0,0,20">
+                <StackPanel>
+                    <WrapPanel>
+                        <Button Content="Restringir ACL — Log Dir"    Command="{Binding HardenLogDirCommand}"   Margin="0,0,8,8"/>
+                        <Button Content="Restringir ACL — Policy File" Command="{Binding HardenPolicyFileCommand}" Margin="0,0,8,8"/>
+                        <Button Content="Verificar Integridade Hash DB" Command="{Binding VerifyHashDbCommand}"  Margin="0,0,8,8"/>
+                        <Button Content="Snapshot SHA-256 Policy"      Command="{Binding SnapshotHashCommand}"   Margin="0,0,8,8"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding SnapshotHashResult}" FontFamily="Consolas" FontSize="11"
+                               Visibility="{Binding SnapshotHashResult, Converter={StaticResource NullOrEmptyToCollapsed}}"
+                               Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Bootstrap section -->
+            <TextBlock Text="Bootstrap" Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,0,0,12"/>
+            <Border Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                    CornerRadius="8" Padding="20" Margin="0,0,0,20">
+                <StackPanel>
+                    <Button Content="▶  Executar bootstrap_hashdb.exe"
+                            Command="{Binding RunBootstrapCommand}"
+                            HorizontalAlignment="Left" Margin="0,0,0,12"/>
+                    <TextBox Text="{Binding BootstrapOutput}" IsReadOnly="True"
+                             FontFamily="Consolas" FontSize="11" Height="160"
+                             TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                             AcceptsReturn="True"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Save / Apply -->
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Salvar Configurações" Command="{Binding SaveSettingsCommand}"
+                        Margin="0,0,8,0"/>
+                <Button Content="Salvar e Inicializar Sistema" Command="{Binding ApplyAndInitCommand}"
+                        Style="{StaticResource AccentButtonStyle}"/>
+            </StackPanel>
+
+            <TextBlock Text="{Binding StatusMessage}" Foreground="SeaGreen"
+                       Margin="0,12,0,0"
+                       Visibility="{Binding StatusMessage, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

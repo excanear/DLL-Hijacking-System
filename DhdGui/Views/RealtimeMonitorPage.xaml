@@ -1,0 +1,65 @@
+<Page x:Class="DhdGui.Views.RealtimeMonitorPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.modernwpf.com/2019"
+      xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
+      xmlns:vm="clr-namespace:DhdGui.ViewModels"
+      Title="Monitor em Tempo Real">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="180"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+            <Button Content="▶  Iniciar Monitor" Command="{Binding StartMonitorCommand}"
+                    Style="{StaticResource AccentButtonStyle}" Margin="0,0,8,0"/>
+            <Button Content="■  Parar Monitor"  Command="{Binding StopMonitorCommand}" Margin="0,0,8,0"/>
+            <Button Content="🔄 Force Snapshot" Command="{Binding ForceSnapshotCommand}" Margin="0,0,8,0"/>
+            <Button Content="Limpar"            Command="{Binding ClearFindingsCommand}"/>
+
+            <!-- Status text -->
+            <TextBlock Text="{Binding StatusText}" VerticalAlignment="Center" Margin="16,0,0,0"
+                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                       Visibility="{Binding StatusText, Converter={StaticResource NullOrEmptyToCollapsed}}"/>
+
+            <!-- Blinking badge -->
+            <Border Background="OrangeRed" CornerRadius="4" Padding="8,4" Margin="16,0,0,0"
+                    VerticalAlignment="Center"
+                    Visibility="{Binding HasFindings, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="● Findings ativos" Foreground="White" FontWeight="SemiBold" FontSize="12"/>
+            </Border>
+        </StackPanel>
+
+        <!-- Chart -->
+        <lvc:CartesianChart Grid.Row="1" Series="{Binding ChartSeries}"
+                            Margin="0,0,0,12"
+                            ZoomMode="None"
+                            LegendPosition="Hidden"/>
+
+        <!-- DataGrid -->
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Findings}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  EnableRowVirtualization="True"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Timestamp"  Width="150"
+                                    Binding="{Binding DetectedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"/>
+                <DataGridTextColumn Header="Módulo"     Width="160"
+                                    Binding="{Binding ModuleName}"/>
+                <DataGridTextColumn Header="Caminho"    Width="*"
+                                    Binding="{Binding ModulePath}"/>
+                <DataGridTextColumn Header="Detectado por" Width="110"
+                                    Binding="{Binding DetectedByEtw, Converter={StaticResource BoolToEtwString}}"/>
+                <DataGridTextColumn Header="Block Reasons"   Width="250"
+                                    Binding="{Binding BlockReasonsDecoded}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Page>

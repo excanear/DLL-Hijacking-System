@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "policy_name": "default",
+  "description": "Base security policy for DLL Hijacking Defense System",
+  "last_updated": "2026-04-22T00:00:00Z",
+
+  "mode": "AUDIT",
+
+  "thresholds": {
+    "allow":        0.30,
+    "warn":         0.60,
+    "block_strict": 0.61,
+    "block_always": 0.86
+  },
+
+  "score_weights": {
+    "path":      0.40,
+    "name":      0.15,
+    "hash":      0.25,
+    "signature": 0.20
+  },
+
+  "score_modifiers": {
+    "path_tier1_bonus":           0.10,
+    "post_startup_load_penalty": -0.15,
+    "hash_unknown_penalty":      -0.10,
+    "ocsp_unavailable_penalty":  -0.05
+  },
+
+  "path_whitelist": {
+    "tier1": [
+      "C:\\Windows\\System32",
+      "C:\\Windows\\SysWOW64",
+      "C:\\Windows\\WinSxS"
+    ],
+    "tier2": [
+      "C:\\Program Files",
+      "C:\\Program Files (x86)"
+    ],
+    "tier3": []
+  },
+
+  "blocked_paths": [
+    "%TEMP%",
+    "%TMP%",
+    "C:\\Windows\\Temp",
+    "C:\\Users\\Public"
+  ],
+
+  "path_rules": {
+    "allow_unc_paths":               false,
+    "resolve_symlinks":              true,
+    "reject_relative_paths":         true,
+    "reject_short_paths":            true
+  },
+
+  "signature_policy": {
+    "require_valid_signature_tier2": true,
+    "require_valid_signature_tier3": true,
+    "allow_expired_countersign":     false,
+    "check_revocation_ocsp":         true,
+    "ocsp_timeout_ms":               3000,
+    "pin_issuers": {
+      "enabled":  false,
+      "issuers":  []
+    }
+  },
+
+  "monitor": {
+    "polling_interval_ms":        500,
+    "use_etw":                    true,
+    "etw_fallback_to_polling":    true,
+    "alert_on_post_startup_load": true
+  },
+
+  "logging": {
+    "file_path":                  "logs\\dll_hijack_defense.log",
+    "max_file_size_mb":           100,
+    "retention_days":             30,
+    "emit_to_windows_event_log":  true,
+    "flush_interval_ms":          1000,
+    "hmac_enabled":               true
+  },
+
+  "cache": {
+    "enabled":                    true,
+    "max_entries":                1024,
+    "invalidate_on_mtime_change": true,
+    "ttl_seconds_fallback":       3600
+  },
+
+  "anomaly_detection": {
+    "enabled":                       true,
+    "baseline_window_days":          30,
+    "anomaly_threshold_multiplier":  2.0
+  },
+
+  "rules": {
+    "R001_system_dll_outside_system32":        true,
+    "R002_dll_without_valid_signature":        true,
+    "R003_dll_from_temp_directory":            true,
+    "R004_typosquatting_levenshtein_threshold": 2,
+    "R005_homoglyph_unicode_detection":        true,
+    "R006_privileged_process_unvetted_dll":    true,
+    "R007_burst_detection_enabled":            true,
+    "R007_burst_window_seconds":               5,
+    "R007_burst_threshold":                    3
+  }
+}

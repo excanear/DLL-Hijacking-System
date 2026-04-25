@@ -1,0 +1,80 @@
+# Build directories
+build/
+build_dbg/
+out/
+Debug/
+Release/
+
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.vcxproj.filters
+*.sln.DotSettings*
+*.VC.db
+*.ipch
+
+# MSBuild
+obj/
+bin/
+*.obj
+*.lib
+*.exe
+*.dll
+*.pdb
+*.ilk
+
+# CMake
+cmake_install.cmake
+CMakeCache.txt
+CMakeFiles/
+
+# .NET
+.vscode/
+.vs/
+bin/
+obj/
+packages/
+*.user
+*.suo
+.DS_Store
+node_modules/
+.env
+appsettings.local.json
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.vscode/settings.json
+
+# Testing
+*.log
+test_results/
+coverage/
+*.coverage
+
+# Runtime
+config/hash_database.json
+logs/
+crash.log
+*.jsonl
+security_events_*.csv
+security_events_*.jsonl
+
+# Temporary files
+*.tmp
+*.bak
+~$*
+.~$*
+
+# OS-specific
+Thumbs.db
+*.lnk
+.DS_Store
+.AppleDouble
+
+# DLL Hijacking Defense specific
+*.cache
+config/hash_database.json~
+policy/defaults.json~

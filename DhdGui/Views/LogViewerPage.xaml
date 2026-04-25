@@ -1,0 +1,103 @@
+<Page x:Class="DhdGui.Views.LogViewerPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.modernwpf.com/2019"
+      xmlns:conv="clr-namespace:DhdGui.Converters"
+      Title="Logs">
+
+    <Page.Resources>
+        <conv:SeverityToColorConverter x:Key="SevColor"/>
+    </Page.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- File selection + flush -->
+        <Grid Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Arquivo:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableFileNames}"
+                      SelectedItem="{Binding SelectedFileName}"
+                      Margin="0,0,8,0"/>
+            <Button Grid.Column="2" Content="Flush Log" Command="{Binding FlushLogCommand}" Margin="0,0,8,0"/>
+            <Button Grid.Column="3" Content="↻" Command="{Binding RefreshFileListCommand}"
+                    HorizontalAlignment="Left" Width="36"/>
+        </Grid>
+
+        <!-- Filters -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}"
+                CornerRadius="8" Padding="16" Margin="0,0,0,12">
+            <WrapPanel>
+                <TextBlock Text="Severidade:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <ComboBox ItemsSource="{Binding SeverityFilters}" SelectedItem="{Binding FilterSeverity}"
+                          Width="120" Margin="0,0,16,0"/>
+
+                <TextBlock Text="Fonte:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBox Text="{Binding FilterSource, UpdateSourceTrigger=PropertyChanged}"
+                         Width="140" ui:ControlHelper.PlaceholderText="Módulo…" Margin="0,0,16,0"/>
+
+                <TextBlock Text="De:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <DatePicker SelectedDate="{Binding FilterFrom}" Margin="0,0,8,0"/>
+                <TextBlock Text="Até:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <DatePicker SelectedDate="{Binding FilterTo}" Margin="0,0,16,0"/>
+
+                <TextBlock Text="Busca:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Width="200" ui:ControlHelper.PlaceholderText="DLL path, processo…"/>
+            </WrapPanel>
+        </Border>
+
+        <!-- Log DataGrid — virtualised -->
+        <DataGrid Grid.Row="2" ItemsSource="{Binding FilteredEvents}"
+                  AutoGenerateColumns="False" IsReadOnly="True"
+                  CanUserAddRows="False"
+                  EnableRowVirtualization="True"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
+                  ScrollViewer.CanContentScroll="True">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="" Width="24">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Ellipse Width="10" Height="10"
+                                     Fill="{Binding Severity, Converter={StaticResource SevColor}}"
+                                     VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Timestamp"    Width="155"
+                                    Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}"/>
+                <DataGridTextColumn Header="Severity"     Width="80"  Binding="{Binding Severity}"/>
+                <DataGridTextColumn Header="Source"       Width="120" Binding="{Binding SourceModule}"/>
+                <DataGridTextColumn Header="DLL Path"     Width="*"   Binding="{Binding DllPath}"/>
+                <DataGridTextColumn Header="Score"        Width="60"
+                                    Binding="{Binding TrustScore, StringFormat='{}{0:F3}'}"/>
+                <DataGridTextColumn Header="Action"       Width="100" Binding="{Binding Action}"/>
+                <DataGridTextColumn Header="Block Reasons" Width="180" Binding="{Binding BlockReasons}"/>
+                <DataGridTemplateColumn Header="HMAC" Width="52">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding HmacPresent, Converter={StaticResource BoolToLock}}"
+                                       HorizontalAlignment="Center" FontSize="14"
+                                       Foreground="{Binding HmacPresent, Converter={StaticResource BoolToLockColor}}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <ui:ProgressRing Grid.Row="2" IsActive="{Binding IsBusy}"
+                         Width="48" Height="48" HorizontalAlignment="Center" VerticalAlignment="Center"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}"/>
+    </Grid>
+</Page>
