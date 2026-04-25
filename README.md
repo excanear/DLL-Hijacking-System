@@ -1,7 +1,5 @@
 <div align="center">
 
-![DLL Hijacking Defense]()
-
 <img src="https://img.shields.io/badge/plataforma-Windows%2010%2B-0078D4?style=for-the-badge&logo=windows&logoColor=white"/>
 <img src="https://img.shields.io/badge/C%2B%2B-17-00599C?style=for-the-badge&logo=cplusplus&logoColor=white"/>
 <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white"/>
