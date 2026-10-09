@@ -270,7 +270,6 @@ static std::string SerializeEventJson(const LogEvent& e)
 
     return result;
 }
-}
 
 // ===========================================================================
 // Section 3 — HMAC-SHA256 Per-Entry Signing

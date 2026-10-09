@@ -35,6 +35,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cwchar>
+#include <deque>
 #include <string>
 #include <vector>
 
